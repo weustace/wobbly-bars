@@ -5,3 +5,4 @@ authors = ["weustace <weustace@eustacesheen.me.uk>"]
 
 [dependencies]
 minifb = "0.10.3"
+time = "0.1"
