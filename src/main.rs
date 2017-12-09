@@ -108,7 +108,8 @@ thread::spawn(move || {//Physics Thread...
          }
          match tx_bar.send(bars.to_owned()) {
              Ok(_) => {},
-             Err(_) => break,//if the receiver has been destroyed, die
+             Err(_) => break,//if the receiver has been destroyed:
+             //therefore the main thread has terminated, so this one should also die.
          }
          if time::precise_time_ns() - start_time < PHYSICS_UPDATE_TIME {
              thread::sleep(Duration::new(0,(PHYSICS_UPDATE_TIME - (time::precise_time_ns() - start_time)) as u32));
@@ -136,12 +137,13 @@ thread::spawn(move || {//Physics Thread...
      }
 
      let mousedown:bool = window.get_mouse_down(MouseButton::Left);
-     tx_mouse.send((xpos,mousedown)).unwrap();//send slices; we don't need mutability
+     tx_mouse.send((xpos,mousedown)).unwrap();
 
 
      // We unwrap here as we want this code to exit if it fails. Real applications may want to handle this in a different way
      window.update_with_buffer(&buffer).unwrap(); //(courtesy of the MiniFB readme)
     }
-    drop(rx_bar);
+    drop(rx_bar);//Drop the receiver for the std::mpsc::Channel sending from the physics thread
+    //this will make the physics thread die; see above
 
 }
